@@ -1,0 +1,130 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:map_name",
+ "creation": "2024-04-08 17:11:25.873358",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "doctype_configurations_section",
+  "map_name",
+  "parent_doctype",
+  "search_type",
+  "parent_reference_type_field",
+  "child_table_name",
+  "parent_reference_field",
+  "color_codings",
+  "column_break_vxfk",
+  "child_doctype",
+  "child_longitude_field",
+  "child_latitude_field",
+  "color_coding_field"
+ ],
+ "fields": [
+  {
+   "fieldname": "doctype_configurations_section",
+   "fieldtype": "Section Break",
+   "label": "Doctype Configurations"
+  },
+  {
+   "fieldname": "parent_doctype",
+   "fieldtype": "Link",
+   "label": "Parent Doctype",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_vxfk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "child_doctype",
+   "fieldtype": "Link",
+   "label": "Child Doctype",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "parent_reference_field",
+   "fieldtype": "Data",
+   "label": "Parent Reference FIeld",
+   "reqd": 1
+  },
+  {
+   "fieldname": "child_longitude_field",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Child Longitude Field",
+   "reqd": 1
+  },
+  {
+   "fieldname": "child_latitude_field",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Child Latitude Field",
+   "reqd": 1
+  },
+  {
+   "fieldname": "color_coding_field",
+   "fieldtype": "Data",
+   "label": "Color Coding Field"
+  },
+  {
+   "fieldname": "color_codings",
+   "fieldtype": "Table",
+   "label": "Color Codings",
+   "options": "Map View Color Coding"
+  },
+  {
+   "fieldname": "map_name",
+   "fieldtype": "Data",
+   "label": "Map Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "depends_on": "eval:doc.search_type == \"Dynamic Link\" || doc.search_type == \"Child Table Dynamic Link\"",
+   "fieldname": "parent_reference_type_field",
+   "fieldtype": "Data",
+   "label": "Parent Reference Type Field"
+  },
+  {
+   "fieldname": "search_type",
+   "fieldtype": "Select",
+   "label": "Search Type",
+   "options": "Dynamic Link\nLink Field\nChild Table\nChild Table Dynamic Link",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.search_type == \"Child Table\" || doc.search_type == \"Child Table Dynamic Link\"",
+   "fieldname": "child_table_name",
+   "fieldtype": "Data",
+   "label": "Child Table Name"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-04-09 13:42:26.204589",
+ "modified_by": "Administrator",
+ "module": "Maps View Builder",
+ "name": "Map View Configuration",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
