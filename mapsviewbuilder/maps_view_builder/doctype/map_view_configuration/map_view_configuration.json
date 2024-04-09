@@ -13,12 +13,14 @@
   "parent_reference_type_field",
   "child_table_name",
   "parent_reference_field",
-  "color_codings",
   "column_break_vxfk",
   "child_doctype",
   "child_longitude_field",
   "child_latitude_field",
-  "color_coding_field"
+  "color_coding_and_display_fields_mapping_section",
+  "color_coding_field",
+  "color_codings",
+  "display_fields"
  ],
  "fields": [
   {
@@ -100,11 +102,22 @@
    "fieldname": "child_table_name",
    "fieldtype": "Data",
    "label": "Child Table Name"
+  },
+  {
+   "fieldname": "color_coding_and_display_fields_mapping_section",
+   "fieldtype": "Section Break",
+   "label": "Color Coding and Display Fields Mapping"
+  },
+  {
+   "fieldname": "display_fields",
+   "fieldtype": "Table",
+   "label": "Display Fields",
+   "options": "Map View Display Fields"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-09 13:42:26.204589",
+ "modified": "2024-04-09 15:16:57.811441",
  "modified_by": "Administrator",
  "module": "Maps View Builder",
  "name": "Map View Configuration",

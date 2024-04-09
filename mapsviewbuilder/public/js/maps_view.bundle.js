@@ -1,5 +1,4 @@
-// alert("HELLO")
-import * as L from "leaflet";
+import L from "leaflet";
 
 
 class MapsViewBuilder {
@@ -7,9 +6,6 @@ class MapsViewBuilder {
         if (!page || !wrapper) {
             throw ("page and wrapper object is required to init MapsViewBuilder")
         }
-        console.log("PROVIDED PAGE: ", page)
-        console.log("PROVIDED WRAPPER: ", wrapper)
-        console.log("MAP: ", L)
         this.page = page;
         this.wrapper = wrapper;
         this.createMainPage()
@@ -31,16 +27,50 @@ class MapsViewBuilder {
         mapPane.style["z-index"] = 1
         try {
             navigator.geolocation.getCurrentPosition((currentLocation) => {
-                console.log("CURRENT LOCATION: ", currentLocation)
                 const currentLatLong = [currentLocation.coords.latitude, currentLocation.coords.longitude];
-                console.log("CURRENT LATLONG: ", currentLatLong)
                 this.map.setView(currentLatLong, 13)
             })
         } catch (e) {
-            console.log("UNABLE TO GET CURRENT LOCATION: ", e)
+            console.error("UNABLE TO GET CURRENT LOCATION: ", e)
         }
     }
+
+    generateUI(data, displayFields, parentData) {
+        // Create a container div for the UI
+        const container = document.createElement('div');
+
+        // Loop through display fields metadata
+        displayFields.forEach(field => {
+            // Check if the field name exists in the data
+            if (field.field_name in data || field.field_name in parentData) {
+                // Create a label element
+                const label = document.createElement('label');
+                label.textContent = field.field_label + ': ';
+                label.style.fontWeight = "bold"
+
+                // Create a span element to display the field value
+                const valueSpan = document.createElement('span');
+                valueSpan.textContent = field.source == "Parent" ? parentData[field.field_name] : data[field.field_name];
+
+                // Create a line break element for better spacing
+                const lineBreak = document.createElement('br');
+
+                // Append label, value span, and line break to the container
+                container.appendChild(label);
+                container.appendChild(valueSpan);
+                container.appendChild(lineBreak);
+            }
+        });
+
+        // Return the generated container node
+        return container;
+    }
+
     async updateChildValues(values) {
+        console.log("VALUES: ", values)
+        const color_coding_field = this.config.color_coding_field
+        const color_codings = this.config.color_codings
+
 
         this.map.eachLayer((layer) => {
             this.map.removeLayer(layer);
@@ -54,8 +84,15 @@ class MapsViewBuilder {
 
         let mapVIewCHanged = false;
 
-        console.log("VALUES: ", values)
         values.forEach(child => {
+            const generatedUIChild = this.generateUI(child, this.config.display_fields, {})
+            console.log("GENERATED UI: ", generatedUIChild)
+            let color = color_codings.filter(i => i.value == child[color_coding_field])
+            if (color.length > 0) {
+                color = color[0].color
+            } else {
+                color = "#000"
+            }
             const lat = child[this.config.child_latitude_field];
             const long = child[this.config.child_longitude_field]
             if (!mapVIewCHanged) {
@@ -69,7 +106,7 @@ class MapsViewBuilder {
                 mapVIewCHanged = true
             }
             const markerHtmlStyles = `
-                background-color: ${"#000"};
+                background-color: ${color};
                 width: 1.5rem;
                 height: 1.5rem;
                 display: flex;
@@ -102,10 +139,9 @@ class MapsViewBuilder {
                 }
             )
                 .addTo(this.map)
-                .bindPopup(`<b>${child["name"]}</b>`);
+                .bindPopup(generatedUIChild);
         })
 
-        console.log("UPDATING CHILD VALUES")
     }
 
     async prepareForm() {
@@ -132,7 +168,6 @@ class MapsViewBuilder {
             fieldname: 'map_config',
             options: "Doctype",
             async change() {
-                console.log("Selected Parent: ", parentField.get_value())
                 const parent_reference_field = me.config.parent_reference_field
                 const payload = {}
                 if (me.config.search_type == "Link Field") {
@@ -141,17 +176,27 @@ class MapsViewBuilder {
                     payload[me.config.parent_reference_type_field] = me.config.parent_doctype
                     payload[parent_reference_field] = parentField.get_value()
                 }
-                console.log("Payload: ", payload, me.config.child_doctype)
-                const childList = await frappe.db.get_list(me.config.child_doctype, { filters: payload, fields: ["name", me.config.parent_reference_field, me.config.child_latitude_field, me.config.child_longitude_field, me.config.color_coding_field] })
+
+                const fields = ["name", me.config.parent_reference_field, me.config.child_latitude_field, me.config.child_longitude_field, me.config.color_coding_field];
+
+                me.config.display_fields.forEach(i => {
+                    if (!fields.includes(i.field_name) && i.source == "Child") {
+                        fields.push(i.field_name)
+                    }
+                })
+
+                console.log("FIELDS: ", fields)
+
+                const childList = await frappe.db.get_list(me.config.child_doctype, { filters: payload, fields: fields })
                 const parsedChildList = childList.filter(i => (i[me.config.child_latitude_field] && i[me.config.child_latitude_field]));
-                console.log("CHILD LIST: ", parsedChildList)
                 await me.updateChildValues(parsedChildList)
             }
         });
 
 
+
+
         function setOtherFields(config, page) {
-            console.log("SELECTED CONFIG: ", config)
             parentField.df.label = config.parent_doctype
             parentField.df.options = config.parent_doctype
             // parentField.df.read_only = 0
