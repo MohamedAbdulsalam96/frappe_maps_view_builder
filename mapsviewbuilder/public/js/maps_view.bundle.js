@@ -169,15 +169,19 @@ class MapsViewBuilder {
             options: "Doctype",
             async change() {
                 const parent_reference_field = me.config.parent_reference_field
-                const payload = {}
+                let payload = {}
                 if (me.config.search_type == "Link Field") {
                     payload[parent_reference_field] = parentField.get_value()
                 } else if (me.config.search_type == "Dynamic Link") {
                     payload[me.config.parent_reference_type_field] = me.config.parent_doctype
                     payload[parent_reference_field] = parentField.get_value()
+                } else if (me.config.search_type == "Child Table") {
+                    payload = [[me.config.child_table_name, me.config.parent_reference_field, "=", parentField.get_value()]]
+                } else if (me.config.search_type == "Child Table Dynamic Link") {
+                    payload = [[me.config.child_table_name, me.config.parent_reference_field, "=", parentField.get_value()], [me.config.child_table_name, me.config.parent_reference_type_field, "=", me.config.parent_doctype]]
                 }
 
-                const fields = ["name", me.config.parent_reference_field, me.config.child_latitude_field, me.config.child_longitude_field, me.config.color_coding_field];
+                const fields = ["name", me.config.child_latitude_field, me.config.child_longitude_field, me.config.color_coding_field].filter(i => i != null);
 
                 me.config.display_fields.forEach(i => {
                     if (!fields.includes(i.field_name) && i.source == "Child") {
@@ -186,8 +190,10 @@ class MapsViewBuilder {
                 })
 
                 console.log("FIELDS: ", fields)
+                console.log("FILTERS: ", payload)
 
                 const childList = await frappe.db.get_list(me.config.child_doctype, { filters: payload, fields: fields })
+                console.log("CHILDLIST: ", childList)
                 const parsedChildList = childList.filter(i => (i[me.config.child_latitude_field] && i[me.config.child_latitude_field]));
                 await me.updateChildValues(parsedChildList)
             }
